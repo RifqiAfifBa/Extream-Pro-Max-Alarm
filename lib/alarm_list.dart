@@ -1,5 +1,4 @@
-import 'package:AlarmappUIDesignFreebieCommunity/theme/tokens.dart';
-import 'package:AlarmappUIDesignFreebieCommunity/widgets/stretch_wrap.dart';
+import 'tokens.dart';
 import 'package:flutter/material.dart';
 
 class AlarmList extends StatefulWidget {

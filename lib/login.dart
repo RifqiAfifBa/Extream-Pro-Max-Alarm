@@ -1,4 +1,4 @@
-import 'package:AlarmappUIDesignFreebieCommunity/theme/tokens.dart';
+import 'tokens.dart';
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatelessWidget {
