@@ -186,34 +186,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ],
                     ),
 
-                    const SizedBox(height: 20),
-
-                    const _SectionLabel('KEAMANAN'),
-                    const SizedBox(height: 8),
-                    _FieldGroup(
-                      children: [
-                        _ActionRow(
-                          icon: Icons.lock_outline_rounded,
-                          iconColor: AppColors.primary,
-                          title: 'Ubah Password',
-                          subtitle: 'Terakhir diubah 2 bulan lalu',
-                          onTap: () => _showSnack(
-                              context, 'Form ubah password akan muncul'),
-                        ),
-                        const Divider(color: AppColors.border, height: 1, indent: 60),
-                        _ActionRow(
-                          icon: Icons.fingerprint_rounded,
-                          iconColor: AppColors.green,
-                          title: 'Autentikasi 2 Langkah',
-                          subtitle: 'Belum aktif',
-                          onTap: () => _showSnack(context,
-                              'Pengaturan 2FA akan muncul'),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 20),
-
                     const _SectionLabel('ZONA BAHAYA'),
                     const SizedBox(height: 8),
                     _FieldGroup(

@@ -137,44 +137,14 @@ class _AlarmRingingScreenState extends ConsumerState<AlarmRingingScreen>
       _dismissAlarm();
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Row(
-          children: [
-            Icon(Icons.snooze_rounded, color: AppColors.orange, size: 18),
-            SizedBox(width: 8),
-            Text('Snooze 5 menit'),
-          ],
-        ),
-        backgroundColor: AppColors.surface,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(20),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
-    Future.delayed(const Duration(milliseconds: 800), () {
+    Future.delayed(const Duration(milliseconds: 200), () {
       if (mounted) context.go('/alarm');
     });
   }
 
   void _dismissAlarm() {
     _audioService.stopAlarmSound();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Row(
-          children: [
-            Icon(Icons.alarm_off_rounded, color: AppColors.green, size: 18),
-            SizedBox(width: 8),
-            Text('Alarm dimatikan'),
-          ],
-        ),
-        backgroundColor: AppColors.surface,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(20),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
-    Future.delayed(const Duration(milliseconds: 800), () {
+    Future.delayed(const Duration(milliseconds: 200), () {
       if (mounted) context.go('/alarm');
     });
   }
@@ -364,23 +334,7 @@ class _AlarmRingingScreenState extends ConsumerState<AlarmRingingScreen>
                     ],
                   ),
                 ),
-                // Debug wrong answer button
-                if (alarm != null && alarm.challengeType != ChallengeType.none)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: TextButton.icon(
-                      onPressed: _simulateScanWrong,
-                      icon: const Icon(Icons.close, color: AppColors.red, size: 14),
-                      label: const Text(
-                        'Jawaban Salah',
-                        style: TextStyle(
-                          color: AppColors.red,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
+
               ],
             ),
           ],
@@ -512,7 +466,7 @@ class _AlarmRingingScreenState extends ConsumerState<AlarmRingingScreen>
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Hanya di perangkat mobile',
+                        'Support di Mobile',
                         style: TextStyle(
                           color: AppColors.textTertiary,
                           fontSize: 11,
@@ -808,7 +762,7 @@ class _AlarmRingingScreenState extends ConsumerState<AlarmRingingScreen>
 
     final (icon, label) = switch (alarm.challengeType) {
       ChallengeType.qrScan => kIsWeb
-          ? (Icons.check_rounded, 'Cek Kode')
+          ? (Icons.alarm_off_rounded, 'Matikan')
           : (Icons.qr_code_scanner_rounded, 'Scan QR'),
       ChallengeType.math => (Icons.check_rounded, 'Jawab'),
       ChallengeType.wordArrange => (Icons.check_rounded, 'Cek'),
@@ -857,12 +811,8 @@ class _AlarmRingingScreenState extends ConsumerState<AlarmRingingScreen>
     switch (alarm.challengeType) {
       case ChallengeType.qrScan:
         if (kIsWeb) {
-          final answer = _answerController.text.trim();
-          if (answer == alarm.qrSecret) {
-            _dismissAlarm();
-          } else {
-            _simulateScanWrong();
-          }
+          _dismissAlarm();
+          return;
         }
         return;
       case ChallengeType.math:

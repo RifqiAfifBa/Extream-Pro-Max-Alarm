@@ -67,7 +67,9 @@ class _AlarmCardState extends State<AlarmCard>
             color: AppColors.card,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isEnabled ? AppColors.border : AppColors.border.withOpacity(0.4),
+              color: isEnabled
+                  ? AppColors.border
+                  : AppColors.border.withOpacity(0.4),
               width: 1,
             ),
             boxShadow: isEnabled
@@ -115,7 +117,8 @@ class _AlarmCardState extends State<AlarmCard>
                             letterSpacing: -0.5,
                             height: 1,
                           ),
-                          child: Text(widget.alarm.formattedTime24),
+                          child: Text(
+                              '${widget.alarm.formattedTime} ${widget.alarm.amPm}'),
                         ),
                         const SizedBox(height: 4),
                         AnimatedDefaultTextStyle(
@@ -235,7 +238,8 @@ class _AlarmCardState extends State<AlarmCard>
             ),
             ListTile(
               leading: const Icon(Icons.delete_outline, color: AppColors.red),
-              title: const Text('Delete Alarm', style: TextStyle(color: AppColors.red)),
+              title: const Text('Delete Alarm',
+                  style: TextStyle(color: AppColors.red)),
               onTap: () {
                 Navigator.pop(context);
                 widget.onDelete();

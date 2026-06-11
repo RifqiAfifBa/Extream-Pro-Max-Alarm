@@ -37,7 +37,8 @@ class _NextAlarmCardState extends State<NextAlarmCard>
     if (diff <= 0) diff += 1440;
     final hours = diff ~/ 60;
     final minutes = diff % 60;
-    if (hours > 0) return 'In $hours hours ${minutes > 0 ? '$minutes minutes' : ''}';
+    if (hours > 0)
+      return 'In $hours hours ${minutes > 0 ? '$minutes minutes' : ''}';
     return 'In $minutes minutes';
   }
 
@@ -94,8 +95,8 @@ class _NextAlarmCardState extends State<NextAlarmCard>
                 animation: _pulseController,
                 builder: (context, child) {
                   return Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 5),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                     decoration: BoxDecoration(
                       color: AppColors.red.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(20),
@@ -144,7 +145,7 @@ class _NextAlarmCardState extends State<NextAlarmCard>
 
           // Time display
           Text(
-            alarm.formattedTime24,
+            '${alarm.formattedTime} ${alarm.amPm}',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 52,

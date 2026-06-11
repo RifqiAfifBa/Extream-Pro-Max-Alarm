@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/i18n/translations.dart';
 import '../../providers/preferences_provider.dart';
+import '../../providers/auth_provider.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -13,29 +14,32 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  final _emailCtrl = TextEditingController();
+  final _usernameCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
   bool _obscure = true;
 
   @override
   void dispose() {
-    _emailCtrl.dispose();
+    _usernameCtrl.dispose();
     _passwordCtrl.dispose();
     super.dispose();
   }
 
-
-  void _showSnack(String message) {
+  void _showSnack(String message, {bool isError = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.info_outline, color: AppColors.primary, size: 18),
+            Icon(
+              isError ? Icons.error_outline : Icons.info_outline,
+              color: isError ? AppColors.red : AppColors.primary,
+              size: 18,
+            ),
             const SizedBox(width: 10),
-            Expanded(child: Text(message)),
+            Expanded(child: Text(message, textAlign: TextAlign.center)),
           ],
         ),
-        backgroundColor: AppColors.surface,
+        backgroundColor: isError ? AppColors.red.withOpacity(0.9) : AppColors.surface,
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.all(20),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -44,9 +48,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   void _signIn() {
-    // UI demo only — no actual authentication.
-    // In a real app you'd validate + hit your auth backend here.
-    context.go('/alarm');
+    final username = _usernameCtrl.text.trim();
+    final password = _passwordCtrl.text.trim();
+
+    if (username.isEmpty || password.isEmpty) {
+      _showSnack('Username dan password harus diisi', isError: true);
+      return;
+    }
+
+    final success = ref.read(authProvider.notifier).login(username, password);
+    if (success) {
+      context.go('/alarm');
+    } else {
+      _showSnack('Username atau password salah', isError: true);
+    }
   }
 
   @override
@@ -107,14 +122,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
               const SizedBox(height: 32),
 
-              // ── Email field ─────────────────────────────────────────
-              _label(tr('login.email', lang)),
+              // ── Username field ──────────────────────────────────────
+              _label('Username'),
               const SizedBox(height: 6),
               _textField(
-                controller: _emailCtrl,
-                hint: tr('login.email_hint', lang),
-                icon: Icons.email_outlined,
-                keyboardType: TextInputType.emailAddress,
+                controller: _usernameCtrl,
+                hint: 'Masukkan username',
+                icon: Icons.person_outline_rounded,
               ),
 
               const SizedBox(height: 16),
@@ -151,8 +165,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         : 'Password reset coming soon',
                   ),
                   style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
@@ -309,8 +323,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       style: const TextStyle(color: Colors.white, fontSize: 14),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle:
-            const TextStyle(color: AppColors.textTertiary, fontSize: 14),
+        hintStyle: const TextStyle(color: AppColors.textTertiary, fontSize: 14),
         filled: true,
         fillColor: AppColors.card,
         prefixIcon: Icon(icon, color: AppColors.textSecondary, size: 18),

@@ -6,7 +6,9 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/i18n/translations.dart';
 import '../../providers/preferences_provider.dart';
 import '../../providers/audio_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../widgets/loading_indicators.dart';
+
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
@@ -23,268 +25,267 @@ class SettingsScreen extends ConsumerWidget {
         child: PageLoader(
           loadingText: 'Memuat pengaturan...',
           child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            // ── Header (no back button — this is a tab) ─────────────────
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-                child: Row(
-                  children: [
-                    Text(
-                      tr('settings.title', lang),
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineLarge
-                          ?.copyWith(fontSize: 22),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // ── ALARM ──────────────────────────────────────────────────
-            _SectionLabel(tr('settings.section.alarm', lang)),
-            SliverToBoxAdapter(
-              child: _SettingsCard(children: [
-                _SettingsTile(
-                  icon: Icons.music_note_rounded,
-                  iconColor: AppColors.primary,
-                  title: tr('settings.sound.title', lang),
-                  subtitle: selectedSound.name,
-                  trailing: const Icon(Icons.chevron_right,
-                      color: AppColors.textSecondary),
-                  onTap: () =>
-                      _showSoundPicker(context, ref, prefs.alarmSoundId),
-                ),
-                _Div(),
-                _SettingsTile(
-                  icon: Icons.snooze_rounded,
-                  iconColor: AppColors.orange,
-                  title: tr('settings.snooze.title', lang),
-                  subtitle: '${prefs.snoozeMinutes} menit',
-                  trailing: const Icon(Icons.chevron_right,
-                      color: AppColors.textSecondary),
-                  onTap: () =>
-                      _showSnoozePicker(context, ref, prefs.snoozeMinutes),
-                ),
-                _Div(),
-                _SettingsTile(
-                  icon: Icons.access_time_rounded,
-                  iconColor: AppColors.teal,
-                  title: tr('settings.format.title', lang),
-                  subtitle: prefs.timeFormat == TimeFormat.h24
-                      ? '24 jam (13:00)'
-                      : '12 jam (1:00 PM)',
-                  trailing: _SegmentedToggle(
-                    selected: prefs.timeFormat == TimeFormat.h24 ? 1 : 0,
-                    options: const ['12h', '24h'],
-                    onChanged: (i) => notifier.setTimeFormat(
-                        i == 0 ? TimeFormat.h12 : TimeFormat.h24),
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              // ── Header (no back button — this is a tab) ─────────────────
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                  child: Row(
+                    children: [
+                      Text(
+                        tr('settings.title', lang),
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineLarge
+                            ?.copyWith(fontSize: 22),
+                      ),
+                    ],
                   ),
                 ),
-                _Div(),
-                _SwitchTile(
-                  icon: Icons.vibration,
-                  iconColor: AppColors.purple,
-                  title: tr('settings.vibration.title', lang),
-                  subtitle: tr('settings.vibration.desc', lang),
-                  value: prefs.vibrationEnabled,
-                  onChanged: notifier.setVibration,
-                ),
-                _Div(),
-                _SwitchTile(
-                  icon: Icons.volume_up_outlined,
-                  iconColor: AppColors.green,
-                  title: tr('settings.gradual.title', lang),
-                  subtitle: tr('settings.gradual.desc', lang),
-                  value: prefs.gradualVolumeEnabled,
-                  onChanged: notifier.setGradualVolume,
-                ),
-              ]),
-            ),
+              ),
 
-            // ── NOTIFIKASI ─────────────────────────────────────────────
-            _SectionLabel(tr('settings.section.notif', lang)),
-            SliverToBoxAdapter(
-              child: _SettingsCard(children: [
-                _SwitchTile(
-                  icon: Icons.notifications_active_rounded,
-                  iconColor: AppColors.primary,
-                  title: tr('settings.notif.enable.title', lang),
-                  subtitle: tr('settings.notif.enable.desc', lang),
-                  value: prefs.notificationsEnabled,
-                  onChanged: notifier.setNotifications,
-                ),
-                _Div(),
-                _SwitchTile(
-                  icon: Icons.bedtime_outlined,
-                  iconColor: AppColors.purple,
-                  title: tr('settings.bedtime.title', lang),
-                  subtitle: prefs.bedtimeReminderEnabled
-                      ? '${prefs.bedtimeReminderHoursBeforeAlarm} jam sebelum alarm'
-                      : 'Reminder untuk tidur lebih awal',
-                  value: prefs.bedtimeReminderEnabled,
-                  onChanged: (v) =>
-                      notifier.setBedtimeReminder(v,
-                          hoursBeforeAlarm:
-                              prefs.bedtimeReminderHoursBeforeAlarm),
-                ),
-                if (prefs.bedtimeReminderEnabled) ...[
-                  _Div(),
+              // ── ALARM ──────────────────────────────────────────────────
+              _SectionLabel(tr('settings.section.alarm', lang)),
+              SliverToBoxAdapter(
+                child: _SettingsCard(children: [
                   _SettingsTile(
-                    icon: Icons.schedule_rounded,
-                    iconColor: AppColors.teal,
-                    title: tr('settings.bedtime.hours_title', lang),
-                    subtitle:
-                        '${prefs.bedtimeReminderHoursBeforeAlarm} jam (target ${8} jam tidur)',
+                    icon: Icons.music_note_rounded,
+                    iconColor: AppColors.primary,
+                    title: tr('settings.sound.title', lang),
+                    subtitle: selectedSound.name,
                     trailing: const Icon(Icons.chevron_right,
                         color: AppColors.textSecondary),
-                    onTap: () => _showHoursPicker(context, ref,
-                        prefs.bedtimeReminderHoursBeforeAlarm),
+                    onTap: () =>
+                        _showSoundPicker(context, ref, prefs.alarmSoundId),
                   ),
-                ],
-              ]),
-            ),
-
-            // ── KEAMANAN ───────────────────────────────────────────────
-            _SectionLabel(tr('settings.section.security', lang)),
-            SliverToBoxAdapter(
-              child: _SettingsCard(children: [
-                _SettingsTile(
-                  icon: Icons.security,
-                  iconColor: AppColors.red,
-                  title: tr('settings.anticheat.title', lang),
-                  subtitle: tr('settings.anticheat.desc', lang),
-                  trailing: const Icon(Icons.chevron_right,
-                      color: AppColors.textSecondary),
-                  onTap: () => context.push('/anti-cheat'),
-                ),
-                _Div(),
-                _SwitchTile(
-                  icon: Icons.lock_outline,
-                  iconColor: AppColors.orange,
-                  title: tr('settings.lock.title', lang),
-                  subtitle: tr('settings.lock.desc', lang),
-                  value: prefs.lockScreenEnabled,
-                  onChanged: notifier.setLockScreen,
-                ),
-              ]),
-            ),
-
-            // ── TAMPILAN ───────────────────────────────────────────────
-            _SectionLabel(tr('settings.section.appearance', lang)),
-            SliverToBoxAdapter(
-              child: _SettingsCard(children: [
-                _SettingsTile(
-                  icon: Icons.brightness_6_rounded,
-                  iconColor: AppColors.purple,
-                  title: tr('settings.theme.title', lang),
-                  subtitle: prefs.themeMode == AppThemeMode.dark
-                      ? 'Dark Mode'
-                      : (prefs.themeMode == AppThemeMode.light
-                          ? 'Light Mode'
-                          : 'Otomatis'),
-                  trailing: const Icon(Icons.chevron_right,
-                      color: AppColors.textSecondary),
-                  onTap: () => _showThemePicker(context, ref, prefs.themeMode),
-                ),
-                _Div(),
-                _SettingsTile(
-                  icon: Icons.language_rounded,
-                  iconColor: AppColors.teal,
-                  title: tr('settings.lang.title', lang),
-                  subtitle: prefs.language == AppLanguage.id
-                      ? 'Bahasa Indonesia'
-                      : 'English',
-                  trailing: const Icon(Icons.chevron_right,
-                      color: AppColors.textSecondary),
-                  onTap: () =>
-                      _showLanguagePicker(context, ref, prefs.language),
-                ),
-              ]),
-            ),
-
-            // ── BANTUAN & TENTANG ──────────────────────────────────────
-            _SectionLabel(tr('settings.section.help', lang)),
-            SliverToBoxAdapter(
-              child: _SettingsCard(children: [
-                _SettingsTile(
-                  icon: Icons.help_outline,
-                  iconColor: AppColors.primary,
-                  title: tr('settings.help.title', lang),
-                  subtitle: tr('settings.help.desc', lang),
-                  trailing: const Icon(Icons.chevron_right,
-                      color: AppColors.textSecondary),
-                  onTap: () => context.push('/help'),
-                ),
-                _Div(),
-                _SettingsTile(
-                  icon: Icons.shield_outlined,
-                  iconColor: AppColors.green,
-                  title: tr('settings.privacy.title', lang),
-                  subtitle: tr('settings.privacy.desc', lang),
-                  trailing: const Icon(Icons.chevron_right,
-                      color: AppColors.textSecondary),
-                  onTap: () => context.push('/privacy'),
-                ),
-                _Div(),
-                _SettingsTile(
-                  icon: Icons.gavel_outlined,
-                  iconColor: AppColors.orange,
-                  title: tr('settings.tos.title', lang),
-                  subtitle: tr('settings.tos.desc', lang),
-                  trailing: const Icon(Icons.chevron_right,
-                      color: AppColors.textSecondary),
-                  onTap: () => context.push('/tos'),
-                ),
-                _Div(),
-                _SettingsTile(
-                  icon: Icons.info_outline,
-                  iconColor: AppColors.textSecondary,
-                  title: tr('settings.version.title', lang),
-                  subtitle: 'XAlarm v1.0.0 (build 2026.05)',
-                ),
-              ]),
-            ),
-
-            // ── Sign out ───────────────────────────────────────────────
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
-                child: GestureDetector(
-                  onTap: () => _confirmSignOut(context, ref),
-                  child: Container(
-                    height: 54,
-                    decoration: BoxDecoration(
-                      color: AppColors.red.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(16),
-                      border:
-                          Border.all(color: AppColors.red.withOpacity(0.3)),
+                  _Div(),
+                  _SettingsTile(
+                    icon: Icons.snooze_rounded,
+                    iconColor: AppColors.orange,
+                    title: tr('settings.snooze.title', lang),
+                    subtitle: '${prefs.snoozeMinutes} menit',
+                    trailing: const Icon(Icons.chevron_right,
+                        color: AppColors.textSecondary),
+                    onTap: () =>
+                        _showSnoozePicker(context, ref, prefs.snoozeMinutes),
+                  ),
+                  _Div(),
+                  _SettingsTile(
+                    icon: Icons.access_time_rounded,
+                    iconColor: AppColors.teal,
+                    title: tr('settings.format.title', lang),
+                    subtitle: prefs.timeFormat == TimeFormat.h24
+                        ? '24 jam (13:00)'
+                        : '12 jam (1:00 PM)',
+                    trailing: _SegmentedToggle(
+                      selected: prefs.timeFormat == TimeFormat.h24 ? 1 : 0,
+                      options: const ['12h', '24h'],
+                      onChanged: (i) => notifier.setTimeFormat(
+                          i == 0 ? TimeFormat.h12 : TimeFormat.h24),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.logout_rounded,
-                            color: AppColors.red, size: 18),
-                        const SizedBox(width: 8),
-                        Text(
-                          tr('settings.signout', lang),
-                          style: const TextStyle(
-                            color: AppColors.red,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
+                  ),
+                  _Div(),
+                  _SwitchTile(
+                    icon: Icons.vibration,
+                    iconColor: AppColors.purple,
+                    title: tr('settings.vibration.title', lang),
+                    subtitle: tr('settings.vibration.desc', lang),
+                    value: prefs.vibrationEnabled,
+                    onChanged: notifier.setVibration,
+                  ),
+                  _Div(),
+                  _SwitchTile(
+                    icon: Icons.volume_up_outlined,
+                    iconColor: AppColors.green,
+                    title: tr('settings.gradual.title', lang),
+                    subtitle: tr('settings.gradual.desc', lang),
+                    value: prefs.gradualVolumeEnabled,
+                    onChanged: notifier.setGradualVolume,
+                  ),
+                ]),
+              ),
+
+              // ── NOTIFIKASI ─────────────────────────────────────────────
+              _SectionLabel(tr('settings.section.notif', lang)),
+              SliverToBoxAdapter(
+                child: _SettingsCard(children: [
+                  _SwitchTile(
+                    icon: Icons.notifications_active_rounded,
+                    iconColor: AppColors.primary,
+                    title: tr('settings.notif.enable.title', lang),
+                    subtitle: tr('settings.notif.enable.desc', lang),
+                    value: prefs.notificationsEnabled,
+                    onChanged: notifier.setNotifications,
+                  ),
+                  _Div(),
+                  _SwitchTile(
+                    icon: Icons.bedtime_outlined,
+                    iconColor: AppColors.purple,
+                    title: tr('settings.bedtime.title', lang),
+                    subtitle: prefs.bedtimeReminderEnabled
+                        ? '${prefs.bedtimeReminderHoursBeforeAlarm} jam sebelum alarm'
+                        : 'Reminder untuk tidur lebih awal',
+                    value: prefs.bedtimeReminderEnabled,
+                    onChanged: (v) => notifier.setBedtimeReminder(v,
+                        hoursBeforeAlarm:
+                            prefs.bedtimeReminderHoursBeforeAlarm),
+                  ),
+                  if (prefs.bedtimeReminderEnabled) ...[
+                    _Div(),
+                    _SettingsTile(
+                      icon: Icons.schedule_rounded,
+                      iconColor: AppColors.teal,
+                      title: tr('settings.bedtime.hours_title', lang),
+                      subtitle:
+                          '${prefs.bedtimeReminderHoursBeforeAlarm} jam (target ${8} jam tidur)',
+                      trailing: const Icon(Icons.chevron_right,
+                          color: AppColors.textSecondary),
+                      onTap: () => _showHoursPicker(
+                          context, ref, prefs.bedtimeReminderHoursBeforeAlarm),
+                    ),
+                  ],
+                ]),
+              ),
+
+              // ── KEAMANAN ───────────────────────────────────────────────
+              _SectionLabel(tr('settings.section.security', lang)),
+              SliverToBoxAdapter(
+                child: _SettingsCard(children: [
+                  _SettingsTile(
+                    icon: Icons.security,
+                    iconColor: AppColors.red,
+                    title: tr('settings.anticheat.title', lang),
+                    subtitle: tr('settings.anticheat.desc', lang),
+                    trailing: const Icon(Icons.chevron_right,
+                        color: AppColors.textSecondary),
+                    onTap: () => context.push('/anti-cheat'),
+                  ),
+                  _Div(),
+                  _SwitchTile(
+                    icon: Icons.lock_outline,
+                    iconColor: AppColors.orange,
+                    title: tr('settings.lock.title', lang),
+                    subtitle: tr('settings.lock.desc', lang),
+                    value: prefs.lockScreenEnabled,
+                    onChanged: notifier.setLockScreen,
+                  ),
+                ]),
+              ),
+
+              // ── TAMPILAN ───────────────────────────────────────────────
+              _SectionLabel(tr('settings.section.appearance', lang)),
+              SliverToBoxAdapter(
+                child: _SettingsCard(children: [
+                  _SettingsTile(
+                    icon: Icons.brightness_6_rounded,
+                    iconColor: AppColors.purple,
+                    title: tr('settings.theme.title', lang),
+                    subtitle: prefs.themeMode == AppThemeMode.dark
+                        ? 'Dark Mode'
+                        : (prefs.themeMode == AppThemeMode.light
+                            ? 'Light Mode'
+                            : 'Otomatis'),
+                    trailing: const Icon(Icons.chevron_right,
+                        color: AppColors.textSecondary),
+                    onTap: () =>
+                        _showThemePicker(context, ref, prefs.themeMode),
+                  ),
+                  _Div(),
+                  _SettingsTile(
+                    icon: Icons.language_rounded,
+                    iconColor: AppColors.teal,
+                    title: tr('settings.lang.title', lang),
+                    subtitle: prefs.language == AppLanguage.id
+                        ? 'Bahasa Indonesia'
+                        : 'English',
+                    trailing: const Icon(Icons.chevron_right,
+                        color: AppColors.textSecondary),
+                    onTap: () =>
+                        _showLanguagePicker(context, ref, prefs.language),
+                  ),
+                ]),
+              ),
+
+              // ── BANTUAN & TENTANG ──────────────────────────────────────
+              _SectionLabel(tr('settings.section.help', lang)),
+              SliverToBoxAdapter(
+                child: _SettingsCard(children: [
+                  _SettingsTile(
+                    icon: Icons.help_outline,
+                    iconColor: AppColors.primary,
+                    title: tr('settings.help.title', lang),
+                    subtitle: tr('settings.help.desc', lang),
+                    trailing: const Icon(Icons.chevron_right,
+                        color: AppColors.textSecondary),
+                    onTap: () => context.push('/help'),
+                  ),
+                  _Div(),
+                  _SettingsTile(
+                    icon: Icons.shield_outlined,
+                    iconColor: AppColors.green,
+                    title: tr('settings.privacy.title', lang),
+                    subtitle: tr('settings.privacy.desc', lang),
+                    trailing: const Icon(Icons.chevron_right,
+                        color: AppColors.textSecondary),
+                    onTap: () => context.push('/privacy'),
+                  ),
+                  _Div(),
+                  _SettingsTile(
+                    icon: Icons.gavel_outlined,
+                    iconColor: AppColors.orange,
+                    title: tr('settings.tos.title', lang),
+                    subtitle: tr('settings.tos.desc', lang),
+                    trailing: const Icon(Icons.chevron_right,
+                        color: AppColors.textSecondary),
+                    onTap: () => context.push('/tos'),
+                  ),
+                  _Div(),
+                  _SettingsTile(
+                    icon: Icons.info_outline,
+                    iconColor: AppColors.textSecondary,
+                    title: tr('settings.version.title', lang),
+                    subtitle: 'XAlarm v1.0.0 (build 2026.05)',
+                  ),
+                ]),
+              ),
+
+              // ── Sign out ───────────────────────────────────────────────
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+                  child: GestureDetector(
+                    onTap: () => _confirmSignOut(context, ref),
+                    child: Container(
+                      height: 54,
+                      decoration: BoxDecoration(
+                        color: AppColors.red.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(16),
+                        border:
+                            Border.all(color: AppColors.red.withOpacity(0.3)),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.logout_rounded,
+                              color: AppColors.red, size: 18),
+                          const SizedBox(width: 8),
+                          Text(
+                            tr('settings.signout', lang),
+                            style: const TextStyle(
+                              color: AppColors.red,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
-      
+            ],
+          ),
         ),
       ),
     );
@@ -292,8 +293,7 @@ class SettingsScreen extends ConsumerWidget {
 
   // ── Modal pickers ──────────────────────────────────────────────────────
 
-  void _showSoundPicker(
-      BuildContext context, WidgetRef ref, String currentId) {
+  void _showSoundPicker(BuildContext context, WidgetRef ref, String currentId) {
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.card,
@@ -305,8 +305,7 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showSnoozePicker(
-      BuildContext context, WidgetRef ref, int current) {
+  void _showSnoozePicker(BuildContext context, WidgetRef ref, int current) {
     final lang = ref.read(preferencesProvider).language;
     showModalBottomSheet(
       context: context,
@@ -340,11 +339,13 @@ class SettingsScreen extends ConsumerWidget {
         title: tr('settings.bedtime.title', lang),
         subtitle: tr('settings.bedtime.hours_title', lang),
         options: const [6, 7, 8, 9, 10],
-        labelOf: (h) => '$h ${tr('common.jam', lang)} ${lang == AppLanguage.id ? 'sebelum alarm' : 'before alarm'}',
+        labelOf: (h) =>
+            '$h ${tr('common.jam', lang)} ${lang == AppLanguage.id ? 'sebelum alarm' : 'before alarm'}',
         current: current,
         onPick: (h) {
-          ref.read(preferencesProvider.notifier).setBedtimeReminder(true,
-              hoursBeforeAlarm: h);
+          ref
+              .read(preferencesProvider.notifier)
+              .setBedtimeReminder(true, hoursBeforeAlarm: h);
           Navigator.pop(ctx);
         },
       ),
@@ -362,25 +363,25 @@ class SettingsScreen extends ConsumerWidget {
       builder: (ctx) {
         final lang = ref.read(preferencesProvider).language;
         return _OptionsSheet<AppThemeMode>(
-        title: tr('settings.theme.title', lang),
-        subtitle: tr('settings.theme.desc', lang),
-        options: AppThemeMode.values,
-        labelOf: (m) {
-          switch (m) {
-            case AppThemeMode.dark:
-              return '🌙  ${tr('settings.theme.dark', lang)}';
-            case AppThemeMode.light:
-              return '☀️  ${tr('settings.theme.light', lang)}';
-            case AppThemeMode.system:
-              return '🔄  ${tr('settings.theme.system', lang)}';
-          }
-        },
-        current: current,
-        onPick: (m) {
-          ref.read(preferencesProvider.notifier).setThemeMode(m);
-          Navigator.pop(ctx);
-        },
-      );
+          title: tr('settings.theme.title', lang),
+          subtitle: tr('settings.theme.desc', lang),
+          options: AppThemeMode.values,
+          labelOf: (m) {
+            switch (m) {
+              case AppThemeMode.dark:
+                return '🌙  ${tr('settings.theme.dark', lang)}';
+              case AppThemeMode.light:
+                return '☀️  ${tr('settings.theme.light', lang)}';
+              case AppThemeMode.system:
+                return '🔄  ${tr('settings.theme.system', lang)}';
+            }
+          },
+          current: current,
+          onPick: (m) {
+            ref.read(preferencesProvider.notifier).setThemeMode(m);
+            Navigator.pop(ctx);
+          },
+        );
       },
     );
   }
@@ -396,17 +397,18 @@ class SettingsScreen extends ConsumerWidget {
       builder: (ctx) {
         final lang = ref.read(preferencesProvider).language;
         return _OptionsSheet<AppLanguage>(
-        title: tr('settings.lang.title', lang),
-        subtitle: tr('settings.lang.desc', lang),
-        options: AppLanguage.values,
-        labelOf: (l) =>
-            l == AppLanguage.id ? '🇮🇩  ${tr('settings.lang.id', lang)}' : '🇬🇧  ${tr('settings.lang.en', lang)}',
-        current: current,
-        onPick: (l) {
-          ref.read(preferencesProvider.notifier).setLanguage(l);
-          Navigator.pop(ctx);
-        },
-      );
+          title: tr('settings.lang.title', lang),
+          subtitle: tr('settings.lang.desc', lang),
+          options: AppLanguage.values,
+          labelOf: (l) => l == AppLanguage.id
+              ? '🇮🇩  ${tr('settings.lang.id', lang)}'
+              : '🇬🇧  ${tr('settings.lang.en', lang)}',
+          current: current,
+          onPick: (l) {
+            ref.read(preferencesProvider.notifier).setLanguage(l);
+            Navigator.pop(ctx);
+          },
+        );
       },
     );
   }
@@ -417,8 +419,7 @@ class SettingsScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.card,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
             Container(
@@ -453,6 +454,7 @@ class SettingsScreen extends ConsumerWidget {
             onPressed: () {
               HapticFeedback.mediumImpact();
               Navigator.pop(ctx);
+              ref.read(authProvider.notifier).logout();
               context.go('/login');
             },
             child: Text(tr('settings.signout', lang),
@@ -542,7 +544,8 @@ class _SettingsTile extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 36, height: 36,
+              width: 36,
+              height: 36,
               decoration: BoxDecoration(
                 color: iconColor.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(10),
@@ -640,8 +643,7 @@ class _SegmentedToggle extends StatelessWidget {
             onTap: () => onChanged(i),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 gradient: isSel ? AppColors.primaryGradient : null,
                 borderRadius: BorderRadius.circular(8),
@@ -691,7 +693,8 @@ class _OptionsSheet<T> extends StatelessWidget {
         children: [
           Center(
             child: Container(
-              width: 40, height: 4,
+              width: 40,
+              height: 4,
               margin: const EdgeInsets.only(bottom: 14),
               decoration: BoxDecoration(
                 color: AppColors.border,
@@ -728,9 +731,8 @@ class _OptionsSheet<T> extends StatelessWidget {
                           : AppColors.surface,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: selected
-                            ? AppColors.primary
-                            : Colors.transparent,
+                        color:
+                            selected ? AppColors.primary : Colors.transparent,
                       ),
                     ),
                     child: Row(
@@ -743,9 +745,8 @@ class _OptionsSheet<T> extends StatelessWidget {
                                   ? Colors.white
                                   : AppColors.textSecondary,
                               fontSize: 14,
-                              fontWeight: selected
-                                  ? FontWeight.w700
-                                  : FontWeight.w500,
+                              fontWeight:
+                                  selected ? FontWeight.w700 : FontWeight.w500,
                             ),
                           ),
                         ),
@@ -781,7 +782,8 @@ class _SoundPickerSheet extends StatelessWidget {
         children: [
           Center(
             child: Container(
-              width: 40, height: 4,
+              width: 40,
+              height: 4,
               margin: const EdgeInsets.only(bottom: 14),
               decoration: BoxDecoration(
                 color: AppColors.border,
@@ -835,7 +837,8 @@ class _SoundPickerSheet extends StatelessWidget {
                             ref.read(alarmAudioProvider).previewSound(sound.id);
                           },
                           child: Container(
-                            width: 40, height: 40,
+                            width: 40,
+                            height: 40,
                             decoration: BoxDecoration(
                               color: AppColors.primary.withOpacity(0.15),
                               borderRadius: BorderRadius.circular(10),
@@ -885,10 +888,13 @@ class _SoundPickerSheet extends StatelessWidget {
                         if (!selected)
                           GestureDetector(
                             onTap: () {
-                              ref.read(alarmAudioProvider).previewSound(sound.id);
+                              ref
+                                  .read(alarmAudioProvider)
+                                  .previewSound(sound.id);
                             },
                             child: Container(
-                              width: 32, height: 32,
+                              width: 32,
+                              height: 32,
                               decoration: BoxDecoration(
                                 color: AppColors.primary.withOpacity(0.15),
                                 borderRadius: BorderRadius.circular(8),
